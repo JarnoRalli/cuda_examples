@@ -12,14 +12,14 @@ void print_vector_values(float* vector)
     // This is a so called monolithic kernel, which assumes
     // that the grid of threads processes the array in a single pass.
 
-     // Row offset
-     int row_offset = blockDim.x * gridDim.x;
+     // Row stride
+     int row_stride = blockDim.x * gridDim.x;
 
-    // Block offset
-    int block_offset = blockDim.x * blockIdx.x  + row_offset * blockDim.y * blockIdx.y;
+    // Block offset is the offset to the beginning of the block in question
+    int block_offset = blockDim.x * blockIdx.x  + row_stride * blockDim.y * blockIdx.y;
 
     //Global index
-    int gidx =  block_offset + row_offset * threadIdx.y + threadIdx.x;
+    int gidx =  block_offset + row_stride * threadIdx.y + threadIdx.x;
 
     printf("blockIdx: (%d, %d), threadIdx: (%d, %d), value: %f\n",
            blockIdx.x, blockIdx.y, threadIdx.x, threadIdx.y, vector[gidx]);
