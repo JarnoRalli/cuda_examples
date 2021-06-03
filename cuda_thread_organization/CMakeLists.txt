@@ -48,3 +48,19 @@ target_include_directories(cuda_thread_2D_indexing
 
 target_link_libraries(cuda_thread_2D_indexing CUDA::cudart)
 
+#--- CUDA thread 3D indexing ---
+
+add_executable(cuda_thread_3D_indexing src/cuda_thread_3D_indexing.cu)
+
+set_property(TARGET cuda_thread_3D_indexing PROPERTY CXX_STANDARD 17)
+
+target_include_directories(cuda_thread_3D_indexing
+    PUBLIC 
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(cuda_thread_3D_indexing CUDA::cudart)
+

@@ -7,4 +7,6 @@ grid, and `block` defines the number of actual threads in a `grid`.
 
 * cuda_thread_organization. Prints out `blockIdx` and `threadIdx` ids.
 * cuda_thread_1D_indexing. Vector element access example.
-* cuda_thread_2D_indexing. Matrix element access example.
+* cuda_thread_2D_indexing. 2D Matrix element access example.
+* cuda_thread_3D_indexing. 3D Matrix element access example.
+
