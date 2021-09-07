@@ -6,6 +6,20 @@
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool abort = true)
+{
+    if(error_code != cudaSuccess)
+    {
+        fprintf(stderr, "gpuAssert: %s %s %d\n", cudaGetErrorString(error_code), file, line);
+        if(abort)
+        {
+            exit(error_code);
+        }
+    }
+}
+
 __global__
 void print_vector_values(float* vector)
 {
@@ -49,21 +63,21 @@ int main(int argc, char** argv)
 
     // Reserve memory in the GPU
     vector_t *vector_gpu;
-    cudaMalloc(reinterpret_cast<void**>(&vector_gpu), sizeof(vector_t)*32);
+    gpuErrchk(cudaMalloc(reinterpret_cast<void**>(&vector_gpu), sizeof(vector_t)*32));
 
     // Copy data from host to the GPU
-    cudaMemcpy(vector_gpu, &vector, sizeof(vector_t)*32, cudaMemcpyHostToDevice);
+    gpuErrchk(cudaMemcpy(vector_gpu, &vector, sizeof(vector_t)*32, cudaMemcpyHostToDevice));
 
     // Print the values of the input vector
     std::cout << "Accessing the vector in the device:" << std::endl;
     print_vector_values<<<grid, block>>>(vector_gpu);
 
     // Wait for all the kernels to finnish execution
-    cudaDeviceSynchronize();
+    gpuErrchk(cudaDeviceSynchronize());
 
     // Free memory
-    cudaFree(vector_gpu);
+    gpuErrchk(cudaFree(vector_gpu));
 
-    cudaDeviceReset();
+    gpuErrchk(cudaDeviceReset());
     return 0;
 }

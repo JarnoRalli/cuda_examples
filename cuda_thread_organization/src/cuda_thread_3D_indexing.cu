@@ -4,6 +4,20 @@
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool abort = true)
+{
+    if(error_code != cudaSuccess)
+    {
+        fprintf(stderr, "gpuAssert: %s %s %d\n", cudaGetErrorString(error_code), file, line);
+        if(abort)
+        {
+            exit(error_code);
+        }
+    }
+}
+
 __global__
 void print_matrix_values(int* matrix, int matrix_elems)
 {
@@ -63,23 +77,23 @@ int main(int argc, char** argv)
     
     // Create memory for the 3D matrix in the device
     int *d_matrix;
-    cudaMalloc((void**)&d_matrix, matrix_size_bytes);
+    gpuErrchk(cudaMalloc((void**)&d_matrix, matrix_size_bytes));
 
     // Copy data from the host to the device
-    cudaMemcpy(d_matrix, h_matrix, matrix_size_bytes, cudaMemcpyHostToDevice);
+    gpuErrchk(cudaMemcpy(d_matrix, h_matrix, matrix_size_bytes, cudaMemcpyHostToDevice));
 
     // Print out the values in the matrix
     print_matrix_values<<<grid, block>>>(d_matrix, matrix_size);
 
     // Wait for all the kernels to finnish execution
-    cudaDeviceSynchronize();
+    gpuErrchk(cudaDeviceSynchronize());
 
     // Free both host and device memory
     free(h_matrix);
-    cudaFree(d_matrix);
+    gpuErrchk(cudaFree(d_matrix));
 
     // Reset the device
-    cudaDeviceReset();
+    gpuErrchk(cudaDeviceReset());
     
     return 0;
 }
