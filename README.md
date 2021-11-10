@@ -21,7 +21,9 @@ several blocks are grouped together into grids. Each CUDA block is executed by o
 and cannot be migrated to other SMs in GPU. One SM can run several concurrent CUDA blocks depending on the resources needed
 by the CUDA blocks.
 
-<img src="./images/cuda_blocks_and_grids.png" width="500" align="middle">
+<p align="center">
+<img src="./images/cuda_blocks_and_grids.png" width="500">
+</p>
 
 # Mapping of 2D Data to a GPU
 
@@ -30,7 +32,9 @@ a volume of matrices (3D) can be mapped to the GPU.
 
 ## Mapping of 2D Data to a GPU 
 
-<img src="./images/cuda_2d_element_access.png" width="500" align="middle">
+<p align="center">
+<img src="./images/cuda_2d_element_access.png" width="500">
+</p>
 
 # Examples
 
