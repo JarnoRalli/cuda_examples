@@ -4,6 +4,9 @@
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+// Matrix element type
+using matrix_t = int;
+
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 
 inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool abort = true)
@@ -19,7 +22,7 @@ inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool a
 }
 
 __global__
-void print_matrix_values(int* matrix, int matrix_elems)
+void print_matrix_values(matrix_t* matrix, int matrix_elems)
 {
     // Row stride (with respect to x-axis)
     int row_stride = blockDim.x * gridDim.x;
@@ -50,16 +53,16 @@ int main(int argc, char** argv)
     nx = 2; // Total number of threads in x-direction
     ny = 2; // Total number of threads in y-direction
     nz = 4; // Total number of threads in z-direction
-    
+
     dim3 block(2, 2, 2);
-    dim3 grid( nx/block.x, ny/block.y, nz/block.z);
+    dim3 grid(nx/block.x, ny/block.y, nz/block.z);
 
     // Create a 3D matrix in the host
-    int *h_matrix;
+    matrix_t *h_matrix;
     dim3 matrix_dims(2, 2, 4);
     int matrix_size(matrix_dims.x * matrix_dims.y * matrix_dims.z);
-    int matrix_size_bytes(matrix_size * sizeof(h_matrix));
-    h_matrix = (int*)malloc(matrix_size_bytes);
+    int matrix_size_bytes(matrix_size * sizeof(matrix_t));
+    h_matrix = new matrix_t [matrix_size];
 
     // Fill in the matrix so that the value encodes the position in the matrix.
     // E.g. 211 = (x = 2, y = 1, z = 1)
@@ -70,30 +73,31 @@ int main(int argc, char** argv)
         {
             for(int x = 0; x < matrix_dims.x; ++x)
             {
-                h_matrix[index++] = x*100 + y*10 + z;
+                h_matrix[index++] = static_cast<matrix_t>(x) * matrix_t(100) + static_cast<matrix_t>(y) * matrix_t(10) + static_cast<matrix_t>(z);
             }
         }
     }
-    
+
     // Create memory for the 3D matrix in the device
-    int *d_matrix;
+    matrix_t *d_matrix;
     gpuErrchk(cudaMalloc((void**)&d_matrix, matrix_size_bytes));
 
     // Copy data from the host to the device
     gpuErrchk(cudaMemcpy(d_matrix, h_matrix, matrix_size_bytes, cudaMemcpyHostToDevice));
 
     // Print out the values in the matrix
+    std::cout << "Accessing the matrix in the device:" << std::endl;
     print_matrix_values<<<grid, block>>>(d_matrix, matrix_size);
 
     // Wait for all the kernels to finnish execution
     gpuErrchk(cudaDeviceSynchronize());
 
     // Free both host and device memory
-    free(h_matrix);
+    delete [] h_matrix;
     gpuErrchk(cudaFree(d_matrix));
 
     // Reset the device
     gpuErrchk(cudaDeviceReset());
-    
+
     return 0;
 }
