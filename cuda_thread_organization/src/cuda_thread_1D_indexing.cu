@@ -25,7 +25,7 @@ void print_vector_values(float* vector)
 {
     // This is a so called monolithic kernel, which assumes
     // that the grid of threads processes the array in a single pass.
-    
+
     // Thread index
     int tidx = threadIdx.x;
 
@@ -52,9 +52,9 @@ int main(int argc, char** argv)
     vector = new vector_t [nx];
 
     std::cout << "Vector in the host: ";
-    for(int i = 0; i < nx; ++i )
+    for(int i = 0; i < nx; ++i)
     {
-        vector[i] = static_cast<float>(i) + 0.1f;
+        vector[i] = static_cast<vector_t>(i) + vector_t(0.1);
         if( i != nx -1 )
         {
             std::cout << vector[i] << ", ";

@@ -6,6 +6,9 @@
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+// Vector element type
+using vector_t = float;
+
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 
 inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool abort = true)
@@ -54,7 +57,6 @@ int main(int argc, char** argv)
     // 21, 22, 23, 24, 25, 26, 27, 28
     // 31, 32, 33, 34, 35, 36, 37, 38
     // 41, 42, 43, 44, 45, 46, 47, 48
-    using vector_t = float;
     vector_t vector[] = {
         11, 12, 13, 14, 15, 16, 17, 18, // 8 elements
         21, 22, 23, 24, 25, 26, 27, 28, // 8 elements
