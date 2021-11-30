@@ -8,14 +8,15 @@ CMake is used to build the examples.
 The CUDA programming model provides an abstraction of the GPU architecture and acts as a bridge between an application
 and the implementation on GPU hardware. The model has three key abstractions:
 
-1. a hierarcy of thread groups
+1. a hierarchy of thread groups
 2. shared memories
 3. synchronization
 
 The programming model consists of two different levels of parallelism: a fine-grained data- and thread parallelism embedded
 into a coarse-grained data- and task parallelism. This is achieved by combining arrays of threads, each executing the same code,
 into blocks, and combining several blocks into grids. Each CUDA block is executed by one streaming multiprocessor (SM)
-and cannot be migrated to other SMs in GPU. One SM can run several concurrent CUDA blocks depending on the resources needed
+and cannot be migrated to other SMs in the GPU. Since a block runs in a single SM, the threads in the block can communicate and
+synchronize with each other. One SM can run several concurrent CUDA blocks depending on the resources needed
 by the CUDA blocks. The CUDA programming model guides the programmer to partition the problem into sub-problems
 that are solved independently, in parallel, by these blocks of threads. Following figure shows the mapping between the
 abstract programming model (on the left) and the hardware (on the right).
@@ -25,7 +26,12 @@ abstract programming model (on the left) and the hardware (on the right).
 </p>
 
 As it can be seen from the above figure, a thread maps to a CUDA core, a block of threads maps to a CUDA streaming multiprocessor (SM), and
-CUDA grid maps to a CUDA device. 
+CUDA grid maps to a CUDA device.
+
+## Warp
+
+CUDA programming model follows a SIMT (Single Instruction, Multiple Threads) paradigm. Warp refers to a number of threads being executed
+simultaneously. Currently the warp size is 32. For more information regarding warps, and warp divergency, take a look at [CUDA warps](./cuda_warp/README.md)
 
 ## Execution of a CUDA Program
 
@@ -50,7 +56,7 @@ to the threads for execution. These variables are:
 
 * `threadIdx` with x-, y- and z- coordinates. For example, `threadIdx.x`
 * `blockDim` and `blockIdx` with x-, y- and z- coordinates
-* `gridDim` and `gridIdx` with x-, y- and z- coordinates
+* `gridDim` with x-, y- and z- coordinates
 
 Depending on the problem at hand, there exists many different ways of mapping the data to the threads. In the following example we show an example of one particular way of mapping a 2D matrix to threads.
 There is nothing special about this mapping, it could be mapped in any other way.
@@ -80,5 +86,11 @@ in the above case `row_stride` is 6 and the `block_offset` would be the followin
 
 # Examples
 
-* [CUDA thread organization and element access](./cuda_thread_organization/README.md)
+
+* [CUDA hello world](./cuda_hello_world/README.md)
+* [CUDA device property examples](./cuda_device_properties/README.md)
+* [CUDA thread organization and element access examples](./cuda_thread_organization/README.md)
+* [CUDA add examples](./cuda_add/README.md)
+* [CUDA warp divergence example](./cuda_warp/README.md)
+
 

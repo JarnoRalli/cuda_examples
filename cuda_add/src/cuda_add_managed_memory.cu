@@ -4,6 +4,9 @@
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+// Vector element type
+using vector_t = float;
+
 __global__
 void addKernel(int n, float *x, float *y)
 {
@@ -26,14 +29,14 @@ int main(int argc, char** argv)
 {
     int N = 1 << 20; //1M elements
 
-    float *x, *y;
+    vector_t *x, *y;
 
     // Allocate memory, uses unified memory
-    cudaMallocManaged(&x, N*sizeof(float));
-    cudaMallocManaged(&y, N*sizeof(float));
+    cudaMallocManaged(&x, N*sizeof(vector_t));
+    cudaMallocManaged(&y, N*sizeof(vector_t));
 
     // Initialize the memory on the host device
-    for( int i = 0; i < N; ++i)
+    for(int i = 0; i < N; ++i)
     {
         x[i] = 1.0f;
         y[i] = 2.0f;
@@ -41,23 +44,23 @@ int main(int argc, char** argv)
 
     // Run the kernel on the elements
     int blockSize = 256; // For efficiency, this needs to be a multiple of 32
-    int numBlocks = (N + blockSize -1) / blockSize;
+    int gridSize = (N + blockSize -1) / blockSize;
     
     std::cout << "Number of elements: " << N << std::endl;
     std::cout << "Block size: " << blockSize << std::endl;
-    std::cout << "Number of blocks: " << numBlocks << std::endl;
+    std::cout << "Number of blocks: " << gridSize << std::endl;
     
-    addKernel<<<numBlocks, blockSize>>>(N, x, y);
+    addKernel<<<gridSize, blockSize>>>(N, x, y);
 
     // Wait for all the kernels to finnish execution
     cudaDeviceSynchronize();
 
-    //Check for errors (all values should be 3.0f)
-    float maxError = 0.0f;
+    //Check for errors (all values should be 3.0)
+    vector_t maxError = vector_t(0.0);
 
     for( int i = 0; i < N; ++i )
     {
-        maxError = std::max(maxError, std::abs(y[i] - 3.0f));
+        maxError = std::max(maxError, std::abs(y[i] - vector_t(3.0)));
     }
 
     cudaFree(x);
