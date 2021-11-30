@@ -1,7 +1,10 @@
 #include <iostream>
 #include <cmath>
 
-void add(int n, float *x, float *y)
+// Vector element type
+using vector_t = float;
+
+void add(int n, vector_t *x, vector_t *y)
 {
     for(int i = 0; i < n; ++i)
     {
@@ -13,23 +16,23 @@ int main(int argc, char** argv)
 {
     int N = 1 << 20; //1M elements
 
-    float *x = new float[N];
-    float *y = new float[N];
+    vector_t *x = new vector_t[N];
+    vector_t *y = new vector_t[N];
 
-    for( int i = 0; i < N; ++i)
+    for(int i = 0; i < N; ++i)
     {
-        x[i] = 1.0f;
-        y[i] = 2.0f;
+        x[i] = vector_t(1);
+        y[i] = vector_t(2);
     }
 
     add(N, x, y);
 
-    //Check for errors (all values should be 3.0f)
-    float maxError = 0.0f;
+    //Check for errors (all values should be 3.0)
+    vector_t maxError = vector_t(0);
     
     for( int i = 0; i < N; ++i )
     {
-        maxError = std::max(maxError, std::abs(y[i] - 3.0f));
+        maxError = std::max(maxError, std::abs(y[i] - vector_t(3)));
     }
 
     std::cout << "Max error: " << maxError << std::endl;

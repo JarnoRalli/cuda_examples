@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-
 #include <stdio.h>
 
 #include "cuda_runtime.h"
@@ -13,24 +12,16 @@
 using vector_t = float;
 
 __global__
-void addKernel(int n, float *result, float *x, float *y, float *z)
+void addKernel(int n, vector_t *result, vector_t *x, vector_t *y, vector_t *z)
 {
-    // This is a so called grid-stride-loop, which ensures
-    // that add addressing within warps is unit-stride, and thus
-    // achieves maximum memory coalescing.
-    // For more information: https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
-    // and https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/
-
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-
-    for(int i = index; i < n; i += stride)
+    int idx = threadIdx.x + blockIdx.x * blockDim.x;
+    if(idx < n)
     {
-        result[i] = x[i] + y[i] + z[i];
+        result[idx] = x[idx] + y[idx] + z[idx];
     }
 }
 
-void add(int n, float *result, float *x, float *y, float *z)
+void add(int n, vector_t *result, vector_t *x, vector_t *y, vector_t *z)
 {
     for(unsigned int idx = 0; idx != n; ++idx)
     {
@@ -40,49 +31,54 @@ void add(int n, float *result, float *x, float *y, float *z)
 
 int main(int argc, char** argv)
 {
-    int N = 1 << 22;
+    int N = 1 << 22; // Total number of elements
+    printf("Total number of elements: %d\n", N);
 
-    vector_t *h_x, *h_y, *h_z, *h_result_cpu, *h_result_gpu;
+    dim3 blockSize(256); // Number of threads per block
+    dim3 gridSize(N / blockSize.x);
+
+    vector_t *h_x , *h_y, *h_z, *h_result_cpu, *h_result_gpu;
 
     // Allocate memory on the host
     if( (h_x = new(std::nothrow) vector_t[N]) == nullptr )
     {
-        std::cerr << "Failed to reserve memory for 'h_x'" << std::endl;
+        std::cerr << stderr, "Failed to reserve memory for 'h_x'";
         exit(1);
     }
 
     if( (h_y = new(std::nothrow) vector_t[N]) == nullptr )
     {
-        std::cerr << "Failed to reserve memory for 'h_y'" << std::endl;
+        std::cerr << "Failed to reserve memory for 'h_y'";
         exit(1);
     }
 
     if( (h_z = new(std::nothrow) vector_t[N]) == nullptr )
     {
-        std::cerr << "Failed to reserve memory for 'h_z'" << std::endl;
+        std::cerr << "Failed to reserve memory for 'h_z'";
         exit(1);
     }
 
     if( (h_result_cpu = new(std::nothrow) vector_t[N]) == nullptr )
     {
-        std::cerr << "Failed to reserve memory for 'h_result'" << std::endl;
+        std::cerr << "Failed to reserve memory for 'h_result'";
         exit(1);
     }
     
     if( (h_result_gpu = new(std::nothrow) vector_t[N]) == nullptr )
     {
-        std::cerr << "Failed to reserve memory for 'h_result_gpu'" << std::endl;
+        std::cerr << "Failed to reserve memory for 'h_result_gpu'";
         exit(1);
     }
 
     // Initialize the memory on the host device
     for(int i = 0; i < N; ++i)
     {
-        h_x[i] = vector_t(1.0);
-        h_y[i] = vector_t(2.0);
-        h_z[i] = vector_t(3.0);
+        h_x[i] = vector_t(1);
+        h_y[i] = vector_t(2);
+        h_z[i] = vector_t(3);
     }
 
+    // For instrumentation
     auto start_time = std::chrono::steady_clock::now();
     add(N, h_result_cpu, h_x, h_y, h_z);
     auto cpu_execution_time = since(start_time);
@@ -103,10 +99,6 @@ int main(int argc, char** argv)
     gpuErrchk(cudaMemcpy(d_z, h_z, N*sizeof(vector_t), cudaMemcpyHostToDevice));
     auto cpy_host2device_time = since(start_time);
 
-    // Run the kernel on the elements
-    int blockSize = 256; // For efficiency, this needs to be a multiple of 32
-    int gridSize = (N + blockSize - 1) / blockSize;
-
     start_time = std::chrono::steady_clock::now();
     addKernel<<<gridSize, blockSize>>>(N, d_result_gpu, d_x, d_y, d_z);
 
@@ -119,7 +111,7 @@ int main(int argc, char** argv)
     gpuErrchk(cudaMemcpy(h_result_gpu, d_result_gpu, N*sizeof(vector_t), cudaMemcpyDeviceToHost));
     auto cpy_device2host_time = since(start_time);
 
-    //Check for errors (all values should be 6.0)
+    //Check for errors in the CPU implementation, all values should be 6.0
     vector_t maxError_cpu = vector_t(0.0);
 
     for(int i = 0; i < N; ++i)
@@ -127,7 +119,7 @@ int main(int argc, char** argv)
         maxError_cpu = std::max(maxError_cpu, std::abs(h_result_cpu[i] - vector_t(6.0)));
     }
 
-    //Check for errors (all values should be 6.0)
+    //Check for errors in the GPU implementation, all values should be 6.0
     vector_t maxError_gpu = vector_t(0.0);
 
     for(int i = 0; i < N; ++i)

@@ -1,25 +1,15 @@
 #include <iostream>
 #include <cmath>
+#include <stdio.h>
 
 #include "cuda_runtime.h"
 #include "cuda_profiler_api.h"
 
+#include "tools/timing.hpp"
+#include "tools/error_handling.hpp"
+
 // Matrix element type
 using matrix_t = int;
-
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-
-inline void gpuAssert(cudaError_t error_code, const char *file, int line, bool abort = true)
-{
-    if(error_code != cudaSuccess)
-    {
-        fprintf(stderr, "gpuAssert: %s %s %d\n", cudaGetErrorString(error_code), file, line);
-        if(abort)
-        {
-            exit(error_code);
-        }
-    }
-}
 
 __global__
 void print_matrix_values(matrix_t* matrix, int matrix_elems)
@@ -82,18 +72,28 @@ int main(int argc, char** argv)
     matrix_t *d_matrix;
     gpuErrchk(cudaMalloc((void**)&d_matrix, matrix_size_bytes));
 
+    // For instrumentation
+    auto start_time = std::chrono::steady_clock::now();
+
     // Copy data from the host to the device
     gpuErrchk(cudaMemcpy(d_matrix, h_matrix, matrix_size_bytes, cudaMemcpyHostToDevice));
+    auto host2device_cpy_duration = since(start_time);
 
     // Print out the values in the matrix
     std::cout << "Accessing the matrix in the device:" << std::endl;
+    start_time = std::chrono::steady_clock::now();
     print_matrix_values<<<grid, block>>>(d_matrix, matrix_size);
 
     // Wait for all the kernels to finnish execution
     gpuErrchk(cudaDeviceSynchronize());
+    auto execution_duration = since(start_time);
+
+    // Print memory transfer and kernel execution times
+    std::cout << "Host to device memcpy time (ns) : " << host2device_cpy_duration.count() << std::endl;
+    std::cout << "Kernel execution time (ns) : " << execution_duration.count() << std::endl;
 
     // Free both host and device memory
-    delete [] h_matrix;
+    delete[] h_matrix;
     gpuErrchk(cudaFree(d_matrix));
 
     // Reset the device
