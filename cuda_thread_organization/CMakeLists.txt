@@ -1,5 +1,3 @@
-find_package(CUDAToolkit REQUIRED)
-
 #--------------------------------
 #--- CUDA thread organization ---
 #--------------------------------
@@ -16,6 +14,11 @@ target_include_directories(cuda_thread_organization
 
 target_link_libraries(cuda_thread_organization CUDA::cudart tools)
 
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_thread_organization.cu)
+set_property(TARGET cuda_thread_organization PROPERTY FOLDER "thread_organization")
+
 #-------------------------------
 #--- CUDA thread 1D indexing ---
 #-------------------------------
@@ -31,6 +34,11 @@ target_include_directories(cuda_thread_1D_indexing
 )
 
 target_link_libraries(cuda_thread_1D_indexing CUDA::cudart tools)
+
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_thread_1D_indexing.cu)
+set_property(TARGET cuda_thread_1D_indexing PROPERTY FOLDER "thread_organization")
 
 #-------------------------------
 #--- CUDA thread 2D indexing ---
@@ -50,6 +58,11 @@ target_include_directories(cuda_thread_2D_indexing
 
 target_link_libraries(cuda_thread_2D_indexing CUDA::cudart tools)
 
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_thread_2D_indexing.cu)
+set_property(TARGET cuda_thread_2D_indexing PROPERTY FOLDER "thread_organization")
+
 #-------------------------------
 #--- CUDA thread 3D indexing ---
 #-------------------------------
@@ -68,3 +81,7 @@ target_include_directories(cuda_thread_3D_indexing
 
 target_link_libraries(cuda_thread_3D_indexing CUDA::cudart tools)
 
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_thread_3D_indexing.cu)
+set_property(TARGET cuda_thread_3D_indexing PROPERTY FOLDER "thread_organization")
