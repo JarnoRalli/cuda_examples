@@ -1,9 +1,3 @@
-find_package(CUDAToolkit REQUIRED)
-
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES 61 62 70 72 75)
-endif()
-
 #---------------------------------
 #--- Analyze CUDA warp divergence
 #---------------------------------
@@ -24,3 +18,7 @@ target_include_directories(cuda_warp_divergence
 
 target_link_libraries(cuda_warp_divergence CUDA::cudart)
 
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_warp_divergence.cu)
+set_property(TARGET cuda_warp_divergence PROPERTY FOLDER "warp")

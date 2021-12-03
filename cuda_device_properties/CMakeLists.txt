@@ -1,9 +1,3 @@
-find_package(CUDAToolkit REQUIRED)
-
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES 61 62 70 72 75)
-endif()
-
 #---------------------------------
 #--- Query CUDA device properties
 #---------------------------------
@@ -21,3 +15,7 @@ target_include_directories(cuda_device_query
 
 target_link_libraries(cuda_device_query CUDA::cudart)
 
+# Source group makes the files appear in same places in the logical structure
+# of the project as where they are in the disk. This is for IDEs such as Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES src/cuda_device_query.cu)
+set_property(TARGET cuda_device_query PROPERTY FOLDER "device_properties")
