@@ -21,18 +21,18 @@ void query_device()
     cudaDeviceProp iProp;
     cudaGetDeviceProperties(&iProp, devNo);
 
-    printf("Device %d: %s\n", devNo, iProp.name);
-    printf("\tnumber of streaming multiprocessors:      %d\n", iProp.multiProcessorCount);
-    printf("\tclock rate:                               %d\n", iProp.clockRate);
-    printf("\tcompute capability:                       %d.%d\n", iProp.major, iProp.major);
-    printf("\ttotal amount of memory:                   %4.2f KB\n", iProp.totalGlobalMem / 1024.0);
-    printf("\ttotal amount of shared memory per block:  %4.2f KB\n", iProp.sharedMemPerBlock / 1024.0);
-    printf("\ttotal amount of shared memory per SM:     %4.2f KB\n", iProp.sharedMemPerMultiprocessor/ 1024.0);
-    printf("\ttotal number of registers per block:      %d\n", iProp.regsPerBlock);
-    printf("\twarp size:                                %d\n", iProp.warpSize);
-    printf("\tmaximum number of threads per block:      %d\n", iProp.maxThreadsPerBlock);
-    printf("\tmaximum number of threads per SM:         %d\n", iProp.maxThreadsPerMultiProcessor);
-    printf("\tmaximum grid size:                        (%d, %d, %d)\n", iProp.maxGridSize[0], iProp.maxGridSize[1], iProp.maxGridSize[2]);
+    std::cout << "Device [" << devNo << "]: " << iProp.name << std::endl;
+    std::cout << "\tcompute capability:                       " << iProp.major << "." << iProp.minor << std::endl;
+    std::cout << "\tnumber of streaming multiprocessors:      " << iProp.multiProcessorCount << std::endl;
+    std::cout << "\tclock rate:                               " << iProp.clockRate << std::endl;
+    std::cout << "\ttotal amount of memory:                   " << iProp.totalGlobalMem / 1024.0 << "KB" << std::endl;
+    std::cout << "\ttotal amount of shared memory per block:  " << iProp.sharedMemPerBlock / 1024.0 << "KB" << std::endl;
+    std::cout << "\ttotal amount of shared memory per SM:     " << iProp.sharedMemPerMultiprocessor/ 1024.0 << "KB" << std::endl;
+    std::cout << "\ttotal number of registers per block:      " << iProp.regsPerBlock << "KB" << std::endl;
+    std::cout << "\twarp size:                                " << iProp.warpSize << "KB" << std::endl;
+    std::cout << "\tmaximum number of threads per block:      " << iProp.maxThreadsPerBlock << "KB" << std::endl;
+    std::cout << "\tmaximum number of threads per SM:         " << iProp.maxThreadsPerMultiProcessor << "KB" << std::endl;
+    std::cout << "\tmaximum grid size:                        (" << iProp.maxGridSize[0] << ", " << iProp.maxGridSize[1] << ", " << iProp.maxGridSize[2] << ")" << std::endl;
 }
 
 int main(int argc, char** argv)

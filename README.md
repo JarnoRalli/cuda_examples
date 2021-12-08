@@ -14,7 +14,7 @@ and the implementation on GPU hardware. The model has three key abstractions:
 
 The programming model consists of two different levels of parallelism: a fine-grained data- and thread parallelism embedded
 into a coarse-grained data- and task parallelism. This is achieved by combining arrays of threads, each executing the same code,
-into blocks, and combining several blocks into grids. Each CUDA block is executed by one streaming multiprocessor (SM)
+into thread blocks, and combining several blocks into grids. Each thread block is executed by one streaming multiprocessor (SM)
 and cannot be migrated to other SMs in the GPU. Since a block runs in a single SM, the threads in the block can communicate and
 synchronize with each other. One SM can run several concurrent CUDA blocks depending on the resources needed
 by the CUDA blocks. The CUDA programming model guides the programmer to partition the problem into sub-problems
@@ -28,10 +28,11 @@ abstract programming model (on the left) and the hardware (on the right).
 As it can be seen from the above figure, a thread maps to a CUDA core, a block of threads maps to a CUDA streaming multiprocessor (SM), and
 CUDA grid maps to a CUDA device.
 
-## Warp
+## Warp Size
 
 CUDA programming model follows a SIMT (Single Instruction, Multiple Threads) paradigm. Warp refers to a number of threads being executed
-simultaneously. Currently the warp size is 32. For more information regarding warps, and warp divergency, take a look at [CUDA warps](./cuda_warp/README.md)
+simultaneously in a thread block. Remember that a thread block is executed by one streaming processor (SM). Currently the warp size is 32.
+For more information regarding warps, and warp divergency, take a look at [CUDA warps](./cuda_warp/README.md)
 
 ## Execution of a CUDA Program
 
@@ -48,6 +49,21 @@ Execution of the CUDA programming consists of three steps:
 
 In an NVIDIA GPU, the basic unit of execution is a warp. A warp is a collection of threads that are executed in parallel by an SM. Multiple
 warps can be executed on an SM simultaneously.
+
+## CUDA Device Occupancy
+
+Occupancy refers to the ratio of active warps with respect to the maximum number of warps per SM. Since each thread uses registers and shared memory from the SM,
+the number active warps is limited by the resources that each SM has. In order to calculate the occupancy, NVidia provides an Excel chart called
+`CUDA_Occupancy_Calculator.xls`. This chart allows to analyze device occupancy with respect to different numbers of threads per block, thread register and 
+shared memory usage etc. Following information is needed for the chart:
+
+* Compute capability. The chart contains all the information, like the maximum number of warps per SM, based on the compute capability of the device
+* Threads per block
+* Number of registers used per thread
+* Shared memory used per thread
+
+Probably the easiest way to get the exact number of used registers and shared memory per thread is to build the kernel with a flag that outputs the information.
+For more information, take a look at [resource usage per thread](./cuda_resource_usage/README.md)
 
 # Data Mapping to a GPU
 
@@ -87,10 +103,9 @@ in the above case `row_stride` is 6 and the `block_offset` would be the followin
 # Examples
 
 
-* [CUDA hello world](./cuda_hello_world/README.md)
+* [CUDA hello world example](./cuda_hello_world/README.md)
 * [CUDA device property examples](./cuda_device_properties/README.md)
 * [CUDA thread organization and element access examples](./cuda_thread_organization/README.md)
 * [CUDA add examples](./cuda_add/README.md)
 * [CUDA warp divergence example](./cuda_warp/README.md)
-
-
+* [CUDA resource usage example](./cuda_resource_usage/README.md)

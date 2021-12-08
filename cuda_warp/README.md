@@ -1,9 +1,31 @@
 # CUDA Warp
 
-Warp simply refers to the number of threads executed simultaneously in a block. Currently the warp size is 32, but this might change in future devices.
+A warp simply refers to the number of threads executed simultaneously in a thread block. Currently the warp size is 32, but this might change in future devices.
 While grid and block sizes define logical threads, it's up to the device to assign the threads to the physical cores. Since the warp size is 32, even if a block
 contains only a single thread, we still have 32 concurrent threads running, out of which only one is active. Therefore from efficiency point of view, the number of threads
-per block should be a multiple of 32, i.e. 32, 64, 96 etc. 
+per block should be a multiple of 32, i.e. 32, 64, 96 etc.
+
+## Execution Context
+
+The execution context of a warp consists of the following resources:
+
+* program counters
+* registers
+* shared memory
+
+The execution context of each warp being processed by a SM is maintained during the complete lifetime of the warp. Therefore, there is no penalty switching
+from one execution context to another. Since the execution context is kept during the complete lifetime of the warp, the number of resources, such as registers and shared memory, 
+limits the maximum number of active warps.
+
+## Active Warps
+
+A warp is active, if resources have been allocated to it. Active warps can either be in one of the following states:
+
+* `selected` : actively executing warp
+* `stalled` : not ready for execution
+* `eligible` : ready for execution, but not executing currently
+
+At every instruction, the warp-scheduler selects a warp that has threads ready to execute the next command.
 
 ## Warp Divergence
 
@@ -16,7 +38,6 @@ paradigm. This is due to the fact that the hardware has been optimized to run th
 In the following we have two examples of a CUDA-kernel with `if-then` control structure inside the kernel. The first example does not have warp divergence, since the
 `if-then` clause causes different code to be executed on a warp boundary, whereas the second example has warp divergece. Compiler tries to optimize the code in order
 to avoid warp devergences, and other sub-optimal code. 
-
 
 ```
 __global__
@@ -83,4 +104,3 @@ Device "NVIDIA GeForce GTX 1070 (0)"
 # Warp Divergence Sample Code
 
 * `cuda_warp_divergence`. An example of warp divergence.
-
